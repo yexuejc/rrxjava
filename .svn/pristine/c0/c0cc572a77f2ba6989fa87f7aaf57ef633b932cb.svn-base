@@ -1,0 +1,103 @@
+package com.yexue.android.rrxjava;
+
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.functions.Action1;
+
+public class MainActivity extends AppCompatActivity {
+    TextView te;
+    Button toMap,toHttp;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        te = (TextView) findViewById(R.id.te);
+        toMap = (Button) findViewById(R.id.toMap);
+        toHttp = (Button) findViewById(R.id.toHttp);
+
+        method3();
+        toMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, MapActivity.class));
+            }
+        });
+        toHttp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, HttpActivity.class));
+            }
+        });
+    }
+
+    /**
+     * 原理
+     */
+    public void method1() {
+        //创建 Observable--被观察者 对象
+        Observable<String> observable = Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                subscriber.onNext("Hello world RxJava");
+                subscriber.onCompleted();
+            }
+        });
+        //订阅内容
+        Subscriber subscriber = new Subscriber() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(Object o) {
+                te.setText(o.toString());
+            }
+        };
+        //将Observable和Subscriber相关联，即完成subscriber和observable的订阅
+        observable.subscribe(subscriber);
+    }
+
+    /**
+     * 原理
+     */
+    public void method2() {
+        //被观察者
+        Observable<String> observable = Observable.just("简化 RXJAVA");
+        //订阅
+        Action1<String> onNextAction = new Action1<String>() {
+            @Override
+            public void call(String s) {
+                te.setText(s);
+            }
+        };
+        //关联
+        observable.subscribe(onNextAction);
+    }
+
+    /**
+     * 正常写法
+     */
+    public void method3() {
+        Observable.just("更简化 De RxJava").subscribe(new Action1<String>() {
+            @Override
+            public void call(String s) {
+                te.setText(s);
+            }
+        });
+    }
+}
